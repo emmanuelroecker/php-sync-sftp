@@ -1,0 +1,37 @@
+{
+    "name": "glicer/sync-ftp",
+    "type": "library",
+    "description": "Sync local files with ftp server",
+    "keywords": ["sync", "ftp", "file"],
+    "homepage": "https://github.com/emmanuelroecker/php-sync-ftp",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Emmanuel ROECKER",
+            "homepage": "http://dev.glicer.com"
+        },
+        {
+            "name": "Rym BOUCHAGOUR",
+            "homepage": "http://dev.glicer.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "symfony/finder": "2.3.*",
+        "phpseclib/phpseclib": "0.3.*"
+
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "GlSyncFtp\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "GlSyncFtp\\Tests\\": "tests/"
+        }
+    }
+}
