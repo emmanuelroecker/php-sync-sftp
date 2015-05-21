@@ -92,7 +92,7 @@ class GlSyncFtp
     {
         $sftp = new Net_SFTP($this->server);
         if (!$sftp->login($this->user, $this->password)) {
-            throw new GlSyncFtpException('Login Failed to ' . $this->server);
+            throw new GlSyncFtpException('Login Failed');
         }
 
 
