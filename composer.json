@@ -1,5 +1,5 @@
 {
-    "name": "glicer/sync-ftp",
+    "name": "glicer/sync-sftp",
     "type": "library",
     "description": "Sync local files with ftp server",
     "keywords": ["sync", "ftp", "file"],

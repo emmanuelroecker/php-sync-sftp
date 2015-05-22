@@ -41,14 +41,12 @@ class GlSyncFtp
     private $password;
 
     /**
-     * @param $output
-     * @param $ftpserver
-     * @param $user
-     * @param $password
+     * @param string $ftpserver
+     * @param string $user
+     * @param string $password
      */
-    function __construct($output, $ftpserver, $user, $password)
+    function __construct($ftpserver, $user, $password)
     {
-        $this->output   = $output;
         $this->server   = $ftpserver;
         $this->user     = $user;
         $this->password = $password;
