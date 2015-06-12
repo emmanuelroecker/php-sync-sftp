@@ -25,7 +25,7 @@ php composer.phar install
 
 ## Running Tests
 
-Local ftp server must be installed
+Local ssh ftp server must be installed (On Windows, you can use cygwin openssh)
 
 Change ftp server config in file : phpunit.xml.dist
 
