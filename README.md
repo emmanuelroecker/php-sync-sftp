@@ -3,7 +3,7 @@
 Synchronize local files with sftp (ssh ftp) server.
 
 Compare dates between local and remote files, not using crc.(cyclic redundancy check),
-and update only on remote server.
+and update files only on remote sftp server.
 
 ## Installation
 
@@ -17,7 +17,9 @@ Edit your `composer.json` and add:
 {
     "require": {
        "glicer/sync-sftp": "dev-master"
-    }
+    },
+    "prefer-stable": true,
+    "minimum-stability": "dev"
 }
 ```
 
@@ -28,6 +30,7 @@ php composer.phar install
 ```
 
 ## Example
+
 ```php
      <?php
      // Must point to composer's autoload file.
@@ -40,10 +43,9 @@ php composer.phar install
 
      //launch synchronisation between local and remote files
      $ftp->syncDirectory(
-        "/home/user/localDirectory,     //local source directory
+        "/home/user/localDirectory",     //local source directory
         "/host/web/remoteDirectory",    //remote destination directory
                 function ($op, $nbr, $path) {
-                    switch ($op) {
                         switch ($op) {
                                 case GlSyncFtp::CREATE_DIR:
                                     echo "Create Directory : ";
@@ -62,8 +64,7 @@ php composer.phar install
                                     break;
                                 default:
                             }
-                            echo $nbr . "-" . $path;
-                    }
+                            echo $nbr . " - " . $path . "\n";
                 }
         );
 ```
