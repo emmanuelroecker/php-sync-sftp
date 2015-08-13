@@ -32,41 +32,74 @@ php composer.phar install
 ## Example
 
 ```php
-     <?php
-     // Must point to composer's autoload file.
-     require 'vendor/autoload.php';
+<?php
+// Must point to composer's autoload file.
+require 'vendor/autoload.php';
 
-     use GlSyncFtp\GlSyncFtp;
+use GlSyncFtp\GlSyncFtp;
 
-     //init connection informations
-     $ftp = new GlSyncFtp("192.168.0.1", "username", "password");
+//init connection informations
+$ftp = new GlSyncFtp("192.168.0.1", "username", "password");
 
-     //launch synchronisation between local and remote files
-     $ftp->syncDirectory(
-        "/home/user/localDirectory",     //local source directory
-        "/host/web/remoteDirectory",    //remote destination directory
-                function ($op, $nbr, $path) {
-                        switch ($op) {
-                                case GlSyncFtp::CREATE_DIR:
-                                    echo "Create Directory : ";
-                                    break;
-                                case GlSyncFtp::DELETE_DIR:
-                                    echo "Delete Directory : ";
-                                    break;
-                                case GlSyncFtp::DELETE_FILE:
-                                    echo "Delete File : ";
-                                    break;
-                                case GlSyncFtp::UPDATE_FILE:
-                                    echo "Update File : ";
-                                    break;
-                                case GlSyncFtp::NEW_FILE:
-                                    echo "New File : ";
-                                    break;
-                                default:
-                            }
-                            echo $nbr . " - " . $path . "\n";
-                }
-        );
+//launch synchronisation between local directory and remote files
+$ftp->syncDirectory(
+    "/home/user/localDirectory", //local source directory
+        "/host/web/remoteDirectory", //remote destination directory
+        function ($op, $path) {
+            switch ($op) {
+                case GlSyncFtp::CREATE_DIR:
+                    echo "Create Directory : ";
+                    break;
+                case GlSyncFtp::DELETE_DIR:
+                    echo "Delete Directory : ";
+                    break;
+                case GlSyncFtp::DELETE_FILE:
+                    echo "Delete File : ";
+                    break;
+                case GlSyncFtp::UPDATE_FILE:
+                    echo "Update File : ";
+                    break;
+                case GlSyncFtp::NEW_FILE:
+                    echo "New File : ";
+                    break;
+                default:
+            }
+            echo $path . "\n";
+        }
+);
+
+//launch synchronisation between list of local directories and remote directories
+$fps->syncDirectories(
+    [
+        "/home/user/localDirectory1" => "/host/web/remoteDirectory1",
+        "/home/user/localDirectory2" => "/host/web/remoteDirectory2"
+    ],
+        function ($src, $dst) {
+            echo "Sync directory : $src with $dst";
+        },
+        function ($op, $path) {
+            switch ($op) {
+                case
+                GlSyncFtp::CREATE_DIR:
+                    echo "Create Directory : ";
+                    break;
+                case GlSyncFtp::DELETE_DIR:
+                    echo "Delete Directory : ";
+                    break;
+                case GlSyncFtp::DELETE_FILE:
+                    echo "Delete File : ";
+                    break;
+                case GlSyncFtp::UPDATE_FILE:
+                    echo "Update File : ";
+                    break;
+                case GlSyncFtp::NEW_FILE:
+                    echo "New File : ";
+                    break;
+                default:
+            }
+            echo $path . "\n";
+        }
+);
 ```
 
 ## Running Tests
