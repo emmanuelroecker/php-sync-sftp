@@ -36,8 +36,24 @@ class GlSyncFtp
     const NEW_FILE    = 3;
     const UPDATE_FILE = 4;
 
+    /**
+     * @var SFTP
+     */
+    private $sftp;
+
+    /**
+     * @var string
+     */
     private $server;
+
+    /**
+     * @var string
+     */
     private $user;
+
+    /**
+     * @var string
+     */
     private $password;
 
     /**
@@ -52,6 +68,13 @@ class GlSyncFtp
         $this->password = $password;
     }
 
+    function __destruct()
+    {
+        if (isset($this->sftp)) {
+            $this->sftp->disconnect();
+        }
+    }
+
     /**
      * @param string $root
      * @param array  $listfiles
@@ -61,25 +84,34 @@ class GlSyncFtp
      */
     public function getAllFiles($root, &$listfiles, &$listdirs)
     {
-        $sftp = new SFTP($this->server);
-        if (!$sftp->login($this->user, $this->password)) {
-            throw new GlSyncFtpException('Login Failed');
-        }
-
-        $this->getFiles($sftp, $root, "", $listfiles, $listdirs);
-
+        $this->login();
+        $this->getFiles($root, "", $listfiles, $listdirs);
     }
 
     /**
-     * @param SFTP   $sftp
+     * @throws GlSyncFtpException
+     */
+    private function login()
+    {
+        if (isset($this->sftp)) {
+            return;
+        }
+
+        $this->sftp = new SFTP($this->server);
+        if (!$this->sftp->login($this->user, $this->password)) {
+            throw new GlSyncFtpException('Login Failed');
+        }
+    }
+
+    /**
      * @param string $root
      * @param string $relative
      * @param array  $listfiles
      * @param array  $listdirs
      */
-    private function getFiles(SFTP $sftp, $root, $relative, &$listfiles, &$listdirs)
+    private function getFiles($root, $relative, &$listfiles, &$listdirs)
     {
-        $files = $sftp->rawlist($root . '/' . $relative);
+        $files = $this->sftp->rawlist($root . '/' . $relative);
         if ($files === false) {
             return;
         }
@@ -87,7 +119,7 @@ class GlSyncFtp
             if (($name != '.') && ($name != '..')) {
                 if ($raw['type'] == NET_SFTP_TYPE_DIRECTORY) {
                     $listdirs[$relative . '/' . $name] = $raw;
-                    $this->getFiles($sftp, $root, $relative . '/' . $name, $listfiles, $listdirs);
+                    $this->getFiles($root, $relative . '/' . $name, $listfiles, $listdirs);
                 } else {
                     $listfiles[$relative . '/' . $name] = $raw;
                 }
@@ -107,28 +139,24 @@ class GlSyncFtp
      */
     public function syncDirectory($src, $dst, callable $syncop)
     {
+        $this->login();
+
         $nbrDeleteFile = 0;
         $nbrDeleteDir  = 0;
         $nbrCreateDir  = 0;
         $nbrNewFile    = 0;
         $nbrUpdateFile = 0;
 
-        $sftp = new SFTP($this->server);
-        if (!$sftp->login($this->user, $this->password)) {
-            throw new GlSyncFtpException('Login Failed');
-        }
-
-
         $files = [];
         $dirs  = [];
-        $this->getFiles($sftp, $dst, "", $files, $dirs);
+        $this->getFiles($dst, "", $files, $dirs);
 
         // delete on ftp server, files not present in local directory
         foreach ($files as $name => $raw) {
             if (!file_exists($src . $name)) {
                 $filepathFtp = $dst . strtr($name, ["\\" => "/"]);
                 $syncop(self::DELETE_FILE, $nbrDeleteFile, $filepathFtp);
-                $sftp->delete($filepathFtp);
+                $this->sftp->delete($filepathFtp);
                 $nbrDeleteFile++;
             }
         }
@@ -139,7 +167,7 @@ class GlSyncFtp
             if (!file_exists($src . $name)) {
                 $filepathFtp = $dst . strtr($name, ["\\" => "/"]);
                 $syncop(self::DELETE_DIR, $nbrDeleteDir, $filepathFtp);
-                $sftp->rmdir($filepathFtp);
+                $this->sftp->rmdir($filepathFtp);
                 $nbrDeleteDir++;
             }
         }
@@ -153,11 +181,11 @@ class GlSyncFtp
          */
         foreach ($finderdir as $dir) {
             $dirpathFtp = $dst . "/" . strtr($dir->getRelativePathname(), ["\\" => "/"]);
-            $stat       = $sftp->stat($dirpathFtp);
+            $stat       = $this->sftp->stat($dirpathFtp);
             if (!$stat) {
                 $syncop(self::CREATE_DIR, $nbrCreateDir, $dirpathFtp);
-                $sftp->mkdir($dirpathFtp, $dir->getRealPath(), SFTP::SOURCE_LOCAL_FILE);
-                $sftp->chmod(0755, $dirpathFtp, $dir->getRealPath());
+                $this->sftp->mkdir($dirpathFtp, $dir->getRealPath(), SFTP::SOURCE_LOCAL_FILE);
+                $this->sftp->chmod(0755, $dirpathFtp, $dir->getRealPath());
                 $nbrCreateDir++;
             }
         }
@@ -171,16 +199,16 @@ class GlSyncFtp
          */
         foreach ($finderdir as $file) {
             $filepathFtp = $dst . "/" . strtr($file->getRelativePathname(), ["\\" => "/"]);
-            $stat        = $sftp->stat($filepathFtp);
+            $stat        = $this->sftp->stat($filepathFtp);
             if (!$stat) {
                 $syncop(self::NEW_FILE, $nbrNewFile, $filepathFtp);
-                $sftp->put($filepathFtp, $file->getRealPath(), SFTP::SOURCE_LOCAL_FILE);
+                $this->sftp->put($filepathFtp, $file->getRealPath(), SFTP::SOURCE_LOCAL_FILE);
                 $nbrNewFile++;
             } else {
-                $size = $sftp->size($filepathFtp);
+                $size = $this->sftp->size($filepathFtp);
                 if (($file->getMTime() > $stat['mtime']) || ($file->getSize() != $size)) {
                     $syncop(self::UPDATE_FILE, $nbrUpdateFile, $filepathFtp);
-                    $sftp->put($filepathFtp, $file->getRealPath(), SFTP::SOURCE_LOCAL_FILE);
+                    $this->sftp->put($filepathFtp, $file->getRealPath(), SFTP::SOURCE_LOCAL_FILE);
                     $nbrUpdateFile++;
                 }
             }
