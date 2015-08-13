@@ -70,6 +70,11 @@ class GlSyncFtp
 
     function __destruct()
     {
+        $this->disconnect();
+    }
+
+    function disconnect()
+    {
         if (isset($this->sftp)) {
             $this->sftp->disconnect();
         }
@@ -129,23 +134,38 @@ class GlSyncFtp
 
 
     /**
+     * sync list of local directories with list of ftp directories
+     *
+     * @param array    $list
+     * @param callable $syncdir = null
+     * @param callable $syncop  = null
+     */
+    public function syncDirectories($list, callable $syncdir = null, callable $syncop = null)
+    {
+        foreach ($list as $src => $dst) {
+            if ($syncdir) {
+                $syncdir($src, $dst);
+            }
+            $this->syncDirectory(
+                 $src,
+                     $dst,
+                     $syncop
+            );
+        }
+    }
+
+    /**
      * sync local directory with ftp directory
      *
-     * @param string   $src
-     * @param string   $dst
-     * @param callable $syncop
+     * @param string        $src
+     * @param string        $dst
+     * @param callable|null $syncop
      *
      * @throws GlSyncFtpException
      */
-    public function syncDirectory($src, $dst, callable $syncop)
+    public function syncDirectory($src, $dst, callable $syncop = null)
     {
         $this->login();
-
-        $nbrDeleteFile = 0;
-        $nbrDeleteDir  = 0;
-        $nbrCreateDir  = 0;
-        $nbrNewFile    = 0;
-        $nbrUpdateFile = 0;
 
         $files = [];
         $dirs  = [];
@@ -155,9 +175,10 @@ class GlSyncFtp
         foreach ($files as $name => $raw) {
             if (!file_exists($src . $name)) {
                 $filepathFtp = $dst . strtr($name, ["\\" => "/"]);
-                $syncop(self::DELETE_FILE, $nbrDeleteFile, $filepathFtp);
+                if ($syncop) {
+                    $syncop(self::DELETE_FILE, $filepathFtp);
+                }
                 $this->sftp->delete($filepathFtp);
-                $nbrDeleteFile++;
             }
         }
 
@@ -166,9 +187,10 @@ class GlSyncFtp
         foreach ($dirs as $name => $raw) {
             if (!file_exists($src . $name)) {
                 $filepathFtp = $dst . strtr($name, ["\\" => "/"]);
-                $syncop(self::DELETE_DIR, $nbrDeleteDir, $filepathFtp);
+                if ($syncop) {
+                    $syncop(self::DELETE_DIR, $filepathFtp);
+                }
                 $this->sftp->rmdir($filepathFtp);
-                $nbrDeleteDir++;
             }
         }
 
@@ -183,10 +205,11 @@ class GlSyncFtp
             $dirpathFtp = $dst . "/" . strtr($dir->getRelativePathname(), ["\\" => "/"]);
             $stat       = $this->sftp->stat($dirpathFtp);
             if (!$stat) {
-                $syncop(self::CREATE_DIR, $nbrCreateDir, $dirpathFtp);
+                if ($syncop) {
+                    $syncop(self::CREATE_DIR, $dirpathFtp);
+                }
                 $this->sftp->mkdir($dirpathFtp, $dir->getRealPath(), SFTP::SOURCE_LOCAL_FILE);
                 $this->sftp->chmod(0755, $dirpathFtp, $dir->getRealPath());
-                $nbrCreateDir++;
             }
         }
 
@@ -201,15 +224,17 @@ class GlSyncFtp
             $filepathFtp = $dst . "/" . strtr($file->getRelativePathname(), ["\\" => "/"]);
             $stat        = $this->sftp->stat($filepathFtp);
             if (!$stat) {
-                $syncop(self::NEW_FILE, $nbrNewFile, $filepathFtp);
+                if ($syncop) {
+                    $syncop(self::NEW_FILE, $filepathFtp);
+                }
                 $this->sftp->put($filepathFtp, $file->getRealPath(), SFTP::SOURCE_LOCAL_FILE);
-                $nbrNewFile++;
             } else {
                 $size = $this->sftp->size($filepathFtp);
                 if (($file->getMTime() > $stat['mtime']) || ($file->getSize() != $size)) {
-                    $syncop(self::UPDATE_FILE, $nbrUpdateFile, $filepathFtp);
+                    if ($syncop) {
+                        $syncop(self::UPDATE_FILE, $filepathFtp);
+                    }
                     $this->sftp->put($filepathFtp, $file->getRealPath(), SFTP::SOURCE_LOCAL_FILE);
-                    $nbrUpdateFile++;
                 }
             }
         }
