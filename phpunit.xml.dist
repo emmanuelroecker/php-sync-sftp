@@ -11,8 +11,9 @@
         </whitelist>
     </filter>
     <php>
-        <const name="FTP_SERVER_HOST" value="localhost" />
-        <const name="FTP_SERVER_USER" value="crapoto" />
-        <const name="FTP_SERVER_PASSWORD" value="grenou2703" />
+        <const name="FTP_SERVER_HOST" value="localhost:2222" />
+        <const name="FTP_SERVER_USER" value="foo" />
+        <const name="FTP_SERVER_PASSWORD" value="123" />
     </php>
 </phpunit>
+        

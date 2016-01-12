@@ -32,7 +32,6 @@ php composer.phar install
 ## Example
 
 ```php
-<?php
 // Must point to composer's autoload file.
 require 'vendor/autoload.php';
 
@@ -106,6 +105,13 @@ $fps->syncDirectories(
 
 Local ssh ftp server must be installed (On Windows, you can use cygwin openssh)
 
+With [Docker](http://www.docker.com/) : 
+
+```console
+docker pull atmoz/sftp
+docker run -v //c/tmp/ftp:/home/foo/share -p 2222:22 -d atmoz/sftp foo:123:1001
+```
+
 Change ftp server config in file : phpunit.xml.dist
 
 Launch from command line :
@@ -113,6 +119,8 @@ Launch from command line :
 ```console
 vendor\bin\phpunit
 ```
+
+## License MIT
 
 ## Contact
 
