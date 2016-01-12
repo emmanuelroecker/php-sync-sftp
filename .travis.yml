@@ -7,7 +7,7 @@ services:
   - docker
 before_install:
   - docker pull atmoz/sftp
-  - docker run -v /host/share:/home/foo/share -p 2222:22 -d atmoz/sftp foo:123:1001
+  - docker run -v /host/share:/home/travis/share -p 2222:22 -d atmoz/sftp travis:123
 install:
   - composer install
 script:
