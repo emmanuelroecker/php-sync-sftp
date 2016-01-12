@@ -12,7 +12,7 @@
     </filter>
     <php>
         <const name="FTP_SERVER_HOST" value="localhost:2222" />
-        <const name="FTP_SERVER_USER" value="foo" />
+        <const name="FTP_SERVER_USER" value="travis" />
         <const name="FTP_SERVER_PASSWORD" value="123" />
     </php>
 </phpunit>
