@@ -1,7 +1,7 @@
 <?php
 require __DIR__ . '/../vendor/autoload.php';
 
-mkdir(__DIR__ . '/tests/delete');
+mkdir(__DIR__ . '/../tests/delete');
 
 use GlSyncFtp\GlSyncFtp;
 
