@@ -21,7 +21,7 @@ namespace GlSyncFtp\Tests;
 use GlSyncFtp\GlSyncFtp;
 
 /**
- * @covers        \GlSyncFtpTest\GlSyncFtpTest
+ * @covers        \GlSyncFtp\GlSyncFtp
  * @backupGlobals disabled
  */
 class GlSyncFtpTest extends \PHPUnit_Framework_TestCase
