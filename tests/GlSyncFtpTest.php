@@ -16,7 +16,7 @@
  * File : GlSyncFtpTest.php
  *
  */
-namespace GlHtml\Tests;
+namespace GlSyncFtp\Tests;
 
 use GlSyncFtp\GlSyncFtp;
 
