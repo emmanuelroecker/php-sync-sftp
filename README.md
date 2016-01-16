@@ -43,7 +43,7 @@ require 'vendor/autoload.php';
 use GlSyncFtp\GlSyncFtp;
 
 //init connection informations
-$ftp = new GlSyncFtp("192.168.0.1", "username", "password");
+$ftp = new GlSyncFtp("192.168.0.1", 22, "username", "password");
 
 //launch synchronisation between local directory and remote files
 $ftp->syncDirectory(

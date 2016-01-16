@@ -47,6 +47,11 @@ class GlSyncFtp
     private $server;
 
     /**
+     * @var int
+     */
+    private $port;
+
+    /**
      * @var string
      */
     private $user;
@@ -58,12 +63,14 @@ class GlSyncFtp
 
     /**
      * @param string $ftpserver
+     * @param int    $port
      * @param string $user
      * @param string $password
      */
-    function __construct($ftpserver, $user, $password)
+    function __construct($ftpserver, $port, $user, $password)
     {
         $this->server   = $ftpserver;
+        $this->port     = $port;
         $this->user     = $user;
         $this->password = $password;
     }
@@ -102,7 +109,7 @@ class GlSyncFtp
             return;
         }
 
-        $this->sftp = new SFTP($this->server);
+        $this->sftp = new SFTP($this->server, $this->port);
         if (!$this->sftp->login($this->user, $this->password)) {
             throw new GlSyncFtpException('Login Failed');
         }

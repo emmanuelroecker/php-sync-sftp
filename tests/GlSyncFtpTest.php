@@ -29,7 +29,7 @@ class GlSyncFtpTest extends \PHPUnit_Framework_TestCase
 
     public function testFtpNew()
     {
-        $ftp    = new GlSyncFtp(FTP_SERVER_HOST, FTP_SERVER_USER, FTP_SERVER_PASSWORD);
+        $ftp    = new GlSyncFtp(FTP_SERVER_HOST, FTP_SERVER_PORT, FTP_SERVER_USER, FTP_SERVER_PASSWORD);
         $nbr    = 0;
         $nbrnew = 0;
         $ftp->syncDirectory(
@@ -77,7 +77,7 @@ class GlSyncFtpTest extends \PHPUnit_Framework_TestCase
 
     public function testFtpUpdate()
     {
-        $ftp    = new GlSyncFtp(FTP_SERVER_HOST, FTP_SERVER_USER, FTP_SERVER_PASSWORD);
+        $ftp    = new GlSyncFtp(FTP_SERVER_HOST, FTP_SERVER_PORT, FTP_SERVER_USER, FTP_SERVER_PASSWORD);
         $nbr    = 0;
         $nbrnew = 0;
         $ftp->syncDirectory(
@@ -133,7 +133,7 @@ class GlSyncFtpTest extends \PHPUnit_Framework_TestCase
 
     public function testFtpDelete()
     {
-        $ftp       = new GlSyncFtp(FTP_SERVER_HOST, FTP_SERVER_USER, FTP_SERVER_PASSWORD);
+        $ftp       = new GlSyncFtp(FTP_SERVER_HOST, FTP_SERVER_PORT, FTP_SERVER_USER, FTP_SERVER_PASSWORD);
         $nbr       = 0;
         $nbrdelete = 0;
         $ftp->syncDirectory(
@@ -180,7 +180,7 @@ class GlSyncFtpTest extends \PHPUnit_Framework_TestCase
             __DIR__ . '/delete' => '/test'
         ];
 
-        $ftp = new GlSyncFtp(FTP_SERVER_HOST, FTP_SERVER_USER, FTP_SERVER_PASSWORD);
+        $ftp = new GlSyncFtp(FTP_SERVER_HOST, FTP_SERVER_PORT, FTP_SERVER_USER, FTP_SERVER_PASSWORD);
         $nbr = 0;
         $nbrnew = 0;
         $ftp->syncDirectories(
