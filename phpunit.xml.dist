@@ -12,8 +12,8 @@
     </filter>
     <php>
         <const name="FTP_SERVER_HOST" value="localhost" />
-        <const name="FTP_SERVER_PORT" value="2222" />
-        <const name="FTP_SERVER_USER" value="travis" />
-        <const name="FTP_SERVER_PASSWORD" value="123" />
+        <const name="FTP_SERVER_PORT" value="22" />
+        <const name="FTP_SERVER_USER" value="sftpadmin" />
+        <const name="FTP_SERVER_PASSWORD" value="sftpadmin" />
     </php>
 </phpunit>
