@@ -34,20 +34,20 @@ class GlSyncFtpTest extends \PHPUnit_Framework_TestCase
         $nbrnew = 0;
         $ftp->syncDirectory(
             __DIR__ . '/new',
-                '/test',
+                '/data',
                 function ($op, $path) use (&$nbr, &$nbrnew) {
                     switch ($op) {
                         case GlSyncFtp::CREATE_DIR:
                             $this->assertEquals(0, $nbr);
-                            $this->assertEquals("/test/dir1", $path);
+                            $this->assertEquals("/data/dir1", $path);
                             break;
                         case GlSyncFtp::NEW_FILE:
                             switch ($nbrnew) {
                                 case 0:
-                                    $this->assertEquals("/test/dir1/test1.txt", $path);
+                                    $this->assertEquals("/data/dir1/test1.txt", $path);
                                     break;
                                 case 1:
-                                    $this->assertEquals("/test/test2.txt", $path);
+                                    $this->assertEquals("/data/test2.txt", $path);
                                     break;
                                 default:
                                     $this->fail();
@@ -63,7 +63,7 @@ class GlSyncFtpTest extends \PHPUnit_Framework_TestCase
 
         $files = [];
         $dirs  = [];
-        $ftp->getAllFiles('/test', $files, $dirs);
+        $ftp->getAllFiles('/data', $files, $dirs);
 
         $filesname = array_keys($files);
         $dirsname  = array_keys($dirs);
@@ -82,28 +82,28 @@ class GlSyncFtpTest extends \PHPUnit_Framework_TestCase
         $nbrnew = 0;
         $ftp->syncDirectory(
             __DIR__ . '/update',
-                '/test',
+                '/data',
                 function ($op, $path) use (&$nbr, &$nbrnew) {
                     switch ($op) {
                         case GlSyncFtp::DELETE_FILE:
-                            $this->assertEquals("/test/dir1/test1.txt", $path);
+                            $this->assertEquals("/data/dir1/test1.txt", $path);
                             break;
                         case GlSyncFtp::DELETE_DIR:
-                            $this->assertEquals("/test/dir1", $path);
+                            $this->assertEquals("/data/dir1", $path);
                             break;
                         case GlSyncFtp::CREATE_DIR:
-                            $this->assertEquals("/test/dir2", $path);
+                            $this->assertEquals("/data/dir2", $path);
                             break;
                         case GlSyncFtp::UPDATE_FILE:
-                            $this->assertEquals("/test/test2.txt", $path);
+                            $this->assertEquals("/data/test2.txt", $path);
                             break;
                         case GlSyncFtp::NEW_FILE:
                             switch ($nbrnew) {
                                 case 0:
-                                    $this->assertEquals("/test/dir2/test3.txt", $path);
+                                    $this->assertEquals("/data/dir2/test3.txt", $path);
                                     break;
                                 case 1:
-                                    $this->assertEquals("/test/test2.txt", $path);
+                                    $this->assertEquals("/data/test2.txt", $path);
                                     break;
                                 default:
                                     $this->fail();
@@ -119,7 +119,7 @@ class GlSyncFtpTest extends \PHPUnit_Framework_TestCase
 
         $files = [];
         $dirs  = [];
-        $ftp->getAllFiles('/test', $files, $dirs);
+        $ftp->getAllFiles('/data', $files, $dirs);
 
         $filesname = array_keys($files);
         $dirsname  = array_keys($dirs);
@@ -138,19 +138,19 @@ class GlSyncFtpTest extends \PHPUnit_Framework_TestCase
         $nbrdelete = 0;
         $ftp->syncDirectory(
             __DIR__ . '/delete',
-                '/test',
+                '/data',
                 function ($op, $path) use (&$nbr, &$nbrdelete) {
                     switch ($op) {
                         case GlSyncFtp::DELETE_DIR:
-                            $this->assertEquals("/test/dir2", $path);
+                            $this->assertEquals("/data/dir2", $path);
                             break;
                         case GlSyncFtp::DELETE_FILE:
                             switch ($nbrdelete) {
                                 case 0:
-                                    $this->assertEquals("/test/dir2/test3.txt", $path);
+                                    $this->assertEquals("/data/dir2/test3.txt", $path);
                                     break;
                                 case 1:
-                                    $this->assertEquals("/test/test2.txt", $path);
+                                    $this->assertEquals("/data/test2.txt", $path);
                                     break;
                                 default:
                                     $this->fail();
@@ -166,7 +166,7 @@ class GlSyncFtpTest extends \PHPUnit_Framework_TestCase
 
         $files = [];
         $dirs  = [];
-        $ftp->getAllFiles('/test', $files, $dirs);
+        $ftp->getAllFiles('/data', $files, $dirs);
 
         $this->assertCount(0, $files);
         $this->assertCount(0, $dirs);
@@ -175,9 +175,9 @@ class GlSyncFtpTest extends \PHPUnit_Framework_TestCase
     public function testFtpDirectories()
     {
         $list = [
-            __DIR__ . '/new'    => '/test',
-            __DIR__ . '/update' => '/test',
-            __DIR__ . '/delete' => '/test'
+            __DIR__ . '/new'    => '/data',
+            __DIR__ . '/update' => '/data',
+            __DIR__ . '/delete' => '/data'
         ];
 
         $ftp = new GlSyncFtp(FTP_SERVER_HOST, FTP_SERVER_PORT, FTP_SERVER_USER, FTP_SERVER_PASSWORD);
@@ -192,7 +192,7 @@ class GlSyncFtpTest extends \PHPUnit_Framework_TestCase
                         case GlSyncFtp::CREATE_DIR:
                             switch ($nbr) {
                                 case 0:
-                                    $this->assertEquals("/test/dir1", $path);
+                                    $this->assertEquals("/data/dir1", $path);
                                     break;
                                 default:
                             }
@@ -200,10 +200,10 @@ class GlSyncFtpTest extends \PHPUnit_Framework_TestCase
                         case GlSyncFtp::NEW_FILE:
                             switch ($nbrnew) {
                                 case 0:
-                                    $this->assertEquals("/test/dir1/test1.txt", $path);
+                                    $this->assertEquals("/data/dir1/test1.txt", $path);
                                     break;
                                 case 1:
-                                    $this->assertEquals("/test/test2.txt", $path);
+                                    $this->assertEquals("/data/test2.txt", $path);
                                     break;
                                 default:
 
@@ -218,7 +218,7 @@ class GlSyncFtpTest extends \PHPUnit_Framework_TestCase
 
         $files = [];
         $dirs  = [];
-        $ftp->getAllFiles('/test', $files, $dirs);
+        $ftp->getAllFiles('/data', $files, $dirs);
 
         $this->assertCount(0, $files);
         $this->assertCount(0, $dirs);
