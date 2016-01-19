@@ -162,18 +162,13 @@ class GlSyncFtp
     }
 
     /**
-     * sync local directory with ftp directory
-     *
-     * @param string        $src
-     * @param string        $dst
+     * delete files unknowns on ftp server
+     * 
+     * @param string $src
+     * @param string $dst
      * @param callable|null $syncop
-     *
-     * @throws GlSyncFtpException
      */
-    public function syncDirectory($src, $dst, callable $syncop = null)
-    {
-        $this->login();
-
+    private function syncDelete($src, $dst,callable $syncop = null) {
         $files = [];
         $dirs  = [];
         $this->getFiles($dst, "", $files, $dirs);
@@ -199,8 +194,25 @@ class GlSyncFtp
                 }
                 $this->sftp->rmdir($filepathFtp);
             }
-        }
+        }        
+    }
 
+
+    /**
+     * sync local directory with ftp directory
+     *
+     * @param string        $src
+     * @param string        $dst
+     * @param callable|null $syncop
+     *
+     * @throws GlSyncFtpException
+     */
+    public function syncDirectory($src, $dst, callable $syncop = null)
+    {
+        $this->login();
+
+        $this->syncDelete($src, $dst, $syncop);
+        
         // create new directories
         $finderdir = new Finder();
         $finderdir->directories()->ignoreDotFiles(false)->followLinks()->in($src)->notName('.git*');
