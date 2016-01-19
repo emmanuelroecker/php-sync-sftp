@@ -6,6 +6,7 @@ php:
 services:
   - docker
 before_install:
+  - (cd docker ; tar xpvzf docker.tar.gz)
   - docker pull rhasselbaum/scrappy-sftp
   - docker run -d --name sftp -p 2022:22 -v /$(pwd)/docker/sftp-root:/sftp-root -v /$(pwd)/docker/credentials:/creds rhasselbaum/scrappy-sftp
 install:
