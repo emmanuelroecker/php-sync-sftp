@@ -2,4 +2,6 @@ composer.phar
 composer.lock
 composer-test.lock
 vendor/
+docker/credentials
+docker/sftp-root
 
