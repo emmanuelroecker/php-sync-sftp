@@ -26,147 +26,159 @@ use GlSyncFtp\GlSyncFtp;
  */
 class GlSyncFtpTest extends \PHPUnit_Framework_TestCase
 {
-
-    public function testFtpNew()
+    private function assertAndRemove($elem, array &$list)
     {
-        $ftp    = new GlSyncFtp(FTP_SERVER_HOST, FTP_SERVER_PORT, FTP_SERVER_USER, FTP_SERVER_PASSWORD);
-        $nbr    = 0;
-        $nbrnew = 0;
-        $ftp->syncDirectory(
-            __DIR__ . '/new',
-                '/data',
-                function ($op, $path) use (&$nbr, &$nbrnew) {
-                    switch ($op) {
-                        case GlSyncFtp::CREATE_DIR:
-                            $this->assertEquals(0, $nbr);
-                            $this->assertEquals("/data/dir1", $path);
-                            break;
-                        case GlSyncFtp::NEW_FILE:
-                            switch ($nbrnew) {
-                                case 0:
-                                    $this->assertEquals("/data/dir1/test1.txt", $path);
-                                    break;
-                                case 1:
-                                    $this->assertEquals("/data/test2.txt", $path);
-                                    break;
-                                default:
-                                    $this->fail();
-                            }
-                            $nbrnew++;
-                            break;
-                        default:
-                            $this->fail();
-                    }
-                    $nbr++;
-                }
-        );
+        if (($key = array_search($elem, $list)) !== false) {
+            unset($list[$key]);
+        } else {
+            $this->fail($elem);
+        }
+    }
 
+    public function testFtpDeleteAll()
+    {
+        $ftp = new GlSyncFtp(FTP_SERVER_HOST, FTP_SERVER_PORT, FTP_SERVER_USER, FTP_SERVER_PASSWORD);
+        if (!is_dir(__DIR__ . '/delete')) {
+            mkdir(__DIR__ . '/delete');
+        };
+        $ftp->syncDirectory(__DIR__ . '/delete', '/data');
         $files = [];
         $dirs  = [];
         $ftp->getAllFiles('/data', $files, $dirs);
+        $ftp->disconnect();
 
         $filesname = array_keys($files);
         $dirsname  = array_keys($dirs);
 
-        $this->assertCount(2, $filesname);
-        $this->assertEquals("/dir1/test1.txt", $filesname[0]);
-        $this->assertEquals("/test2.txt", $filesname[1]);
-        $this->assertCount(1, $dirsname);
-        $this->assertEquals("/dir1", $dirsname[0]);
+        $this->assertCount(0, $filesname, var_export($filesname, true));
+        $this->assertCount(0, $dirsname, var_export($dirsname, true));
+    }
+
+    public function testFtpNew()
+    {
+        $ftp = new GlSyncFtp(FTP_SERVER_HOST, FTP_SERVER_PORT, FTP_SERVER_USER, FTP_SERVER_PASSWORD);
+
+        $listDirs  = ["/data/dir1", "/data/dir3"];
+        $listFiles = ["/data/dir3/Test4.txt", "/data/dir1/test1.txt", "/data/test2.txt"];
+        $ftp->syncDirectory(
+            __DIR__ . '/new',
+                '/data',
+                function ($op, $path) use (&$listDirs, &$listFiles) {
+                    switch ($op) {
+                        case GlSyncFtp::CREATE_DIR:
+                            $this->assertAndRemove($path, $listDirs);
+                            break;
+                        case GlSyncFtp::NEW_FILE:
+                            $this->assertAndRemove($path, $listFiles);
+                            break;
+                        default:
+                            $this->fail($op);
+                    }
+                }
+        );
+
+        if (count($listDirs) > 0) {
+            $this->fail("bad dirs " . var_export($listDirs, true));
+        };
+        if (count($listFiles) > 0) {
+            $this->fail("bad files " . var_export($listFiles, true));
+        };
+
+        $files = [];
+        $dirs  = [];
+        $ftp->getAllFiles('/data', $files, $dirs);
+        $ftp->disconnect();
+
+        $filesname = array_keys($files);
+        $dirsname  = array_keys($dirs);
+
+        $this->assertCount(3, $filesname);
+        $this->assertContains("/dir1/test1.txt", $filesname);
+        $this->assertContains("/dir3/Test4.txt", $filesname);
+        $this->assertContains("/test2.txt", $filesname);
+        $this->assertCount(2, $dirsname);
+        $this->assertContains("/dir1", $dirsname);
+        $this->assertContains("/dir3", $dirsname);
     }
 
     public function testFtpUpdate()
     {
-        $ftp    = new GlSyncFtp(FTP_SERVER_HOST, FTP_SERVER_PORT, FTP_SERVER_USER, FTP_SERVER_PASSWORD);
-        $nbr    = 0;
-        $nbrnew = 0;
+        $ftp = new GlSyncFtp(FTP_SERVER_HOST, FTP_SERVER_PORT, FTP_SERVER_USER, FTP_SERVER_PASSWORD);
+
+        $deleteFiles = ["/data/dir1/test1.txt", "/data/dir3/Test4.txt"];
+        $deleteDirs  = ["/data/dir1"];
+        $createDirs  = ["/data/dir2"];
+        $updateFiles = ["/data/test2.txt"];
+        $newFiles    = ["/data/dir2/test3.txt", "/data/test2.txt", "/data/dir3/test4.txt"];
         $ftp->syncDirectory(
             __DIR__ . '/update',
                 '/data',
-                function ($op, $path) use (&$nbr, &$nbrnew) {
+                function ($op, $path) use (&$deleteFiles, &$deleteDirs, &$createDirs, &$updateFiles, &$newFiles) {
                     switch ($op) {
                         case GlSyncFtp::DELETE_FILE:
-                            $this->assertEquals("/data/dir1/test1.txt", $path);
+                            $this->assertAndRemove($path, $deleteFiles);
                             break;
                         case GlSyncFtp::DELETE_DIR:
-                            $this->assertEquals("/data/dir1", $path);
+                            $this->assertAndRemove($path, $deleteDirs);
                             break;
                         case GlSyncFtp::CREATE_DIR:
-                            $this->assertEquals("/data/dir2", $path);
+                            $this->assertAndRemove($path, $createDirs);
                             break;
                         case GlSyncFtp::UPDATE_FILE:
-                            $this->assertEquals("/data/test2.txt", $path);
+                            $this->assertAndRemove($path, $updateFiles);
                             break;
                         case GlSyncFtp::NEW_FILE:
-                            switch ($nbrnew) {
-                                case 0:
-                                    $this->assertEquals("/data/dir2/test3.txt", $path);
-                                    break;
-                                case 1:
-                                    $this->assertEquals("/data/test2.txt", $path);
-                                    break;
-                                default:
-                                    $this->fail();
-                            }
-                            $nbrnew++;
+                            $this->assertAndRemove($path, $newFiles);
                             break;
                         default:
                             $this->fail();
                     }
-                    $nbr++;
                 }
         );
 
         $files = [];
         $dirs  = [];
         $ftp->getAllFiles('/data', $files, $dirs);
+        $ftp->disconnect();
 
         $filesname = array_keys($files);
         $dirsname  = array_keys($dirs);
 
-        $this->assertCount(2, $filesname);
-        $this->assertEquals("/dir2/test3.txt", $filesname[0]);
-        $this->assertEquals("/test2.txt", $filesname[1]);
-        $this->assertCount(1, $dirsname);
-        $this->assertEquals("/dir2", $dirsname[0]);
+        $this->assertCount(3, $filesname);
+        $this->assertContains("/dir2/test3.txt", $filesname);
+        $this->assertContains("/dir3/test4.txt", $filesname);
+        $this->assertContains("/test2.txt", $filesname);
+        $this->assertCount(2, $dirsname);
+        $this->assertContains("/dir2", $dirsname);
+        $this->assertContains("/dir3", $dirsname);
     }
 
     public function testFtpDelete()
     {
-        $ftp       = new GlSyncFtp(FTP_SERVER_HOST, FTP_SERVER_PORT, FTP_SERVER_USER, FTP_SERVER_PASSWORD);
-        $nbr       = 0;
-        $nbrdelete = 0;
+        $ftp         = new GlSyncFtp(FTP_SERVER_HOST, FTP_SERVER_PORT, FTP_SERVER_USER, FTP_SERVER_PASSWORD);
+        $deleteDirs  = ["/data/dir2", "/data/dir3"];
+        $deleteFiles = ["/data/dir2/test3.txt", "/data/test2.txt", "/data/dir3/test4.txt"];
         $ftp->syncDirectory(
             __DIR__ . '/delete',
                 '/data',
-                function ($op, $path) use (&$nbr, &$nbrdelete) {
+                function ($op, $path) use (&$deleteDirs, &$deleteFiles) {
                     switch ($op) {
                         case GlSyncFtp::DELETE_DIR:
-                            $this->assertEquals("/data/dir2", $path);
+                            $this->assertAndRemove($path, $deleteDirs);
                             break;
                         case GlSyncFtp::DELETE_FILE:
-                            switch ($nbrdelete) {
-                                case 0:
-                                    $this->assertEquals("/data/dir2/test3.txt", $path);
-                                    break;
-                                case 1:
-                                    $this->assertEquals("/data/test2.txt", $path);
-                                    break;
-                                default:
-                                    $this->fail();
-                            }
-                            $nbrdelete++;
+                            $this->assertAndRemove($path, $deleteFiles);
                             break;
                         default:
                             $this->fail();
                     }
-                    $nbr++;
                 }
         );
 
         $files = [];
         $dirs  = [];
         $ftp->getAllFiles('/data', $files, $dirs);
+        $ftp->disconnect();
 
         $this->assertCount(0, $files);
         $this->assertCount(0, $dirs);
@@ -180,45 +192,36 @@ class GlSyncFtpTest extends \PHPUnit_Framework_TestCase
             __DIR__ . '/delete' => '/data'
         ];
 
-        $ftp = new GlSyncFtp(FTP_SERVER_HOST, FTP_SERVER_PORT, FTP_SERVER_USER, FTP_SERVER_PASSWORD);
-        $nbr = 0;
-        $nbrnew = 0;
+        $ftp        = new GlSyncFtp(FTP_SERVER_HOST, FTP_SERVER_PORT, FTP_SERVER_USER, FTP_SERVER_PASSWORD);
+        $createDirs = ["/data/dir1", "/data/dir3", "/data/dir2"];
+        $newFiles   = [
+            "/data/dir1/test1.txt",
+            "/data/test2.txt",
+            "/data/dir3/test4.txt",
+            "/data/dir3/Test4.txt",
+            "/data/dir2/test3.txt"
+        ];
         $ftp->syncDirectories(
             $list,
                 function ($src, $dst) {
                 },
-                function ($op, $path) use (&$nbr, &$nbrnew) {
+                function ($op, $path) use (&$createDirs, &$newFiles) {
                     switch ($op) {
                         case GlSyncFtp::CREATE_DIR:
-                            switch ($nbr) {
-                                case 0:
-                                    $this->assertEquals("/data/dir1", $path);
-                                    break;
-                                default:
-                            }
+                            $this->assertAndRemove($path, $createDirs);
                             break;
                         case GlSyncFtp::NEW_FILE:
-                            switch ($nbrnew) {
-                                case 0:
-                                    $this->assertEquals("/data/dir1/test1.txt", $path);
-                                    break;
-                                case 1:
-                                    $this->assertEquals("/data/test2.txt", $path);
-                                    break;
-                                default:
-
-                            }
-                            $nbrnew++;
+                            $this->assertAndRemove($path, $newFiles);
                             break;
                         default:
                     }
-                    $nbr++;
                 }
         );
 
         $files = [];
         $dirs  = [];
         $ftp->getAllFiles('/data', $files, $dirs);
+        $ftp->disconnect();
 
         $this->assertCount(0, $files);
         $this->assertCount(0, $dirs);
