@@ -67,7 +67,7 @@ class GlSyncFtp
      * @param string $user
      * @param string $password
      */
-    function __construct($ftpserver, $port, $user, $password)
+    public function __construct($ftpserver, $port, $user, $password)
     {
         $this->server   = $ftpserver;
         $this->port     = $port;
@@ -75,12 +75,12 @@ class GlSyncFtp
         $this->password = $password;
     }
 
-    function __destruct()
+    public function __destruct()
     {
         $this->disconnect();
     }
 
-    function disconnect()
+    public function disconnect()
     {
         if (isset($this->sftp)) {
             $this->sftp->disconnect();
