@@ -4,6 +4,7 @@
 [![Build Status](https://travis-ci.org/emmanuelroecker/php-sync-sftp.svg)](https://travis-ci.org/emmanuelroecker/php-sync-sftp)
 [![Coverage Status](https://coveralls.io/repos/emmanuelroecker/php-sync-sftp/badge.svg?branch=master&service=github)](https://coveralls.io/github/emmanuelroecker/php-sync-sftp?branch=master)
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/11462785-d3ea-4ce5-a1ef-e870799ceb13/mini.png)](https://insight.sensiolabs.com/projects/11462785-d3ea-4ce5-a1ef-e870799ceb13)
+[![Dependency Status](https://www.versioneye.com/user/projects/57c172d0968d640049e12195/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/57c172d0968d640049e12195)
 
 Synchronize local files with sftp (ssh ftp) server.
 
